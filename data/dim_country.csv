@@ -1,0 +1,6 @@
+country_id,country_name,iso_code,region,currency_code,latitude,longitude
+ID,Indonesia,IDN,ASEAN,IDR,-0.789,113.921
+TH,Thailand,THA,ASEAN,THB,15.87,100.992
+MY,Malaysia,MYS,ASEAN,MYR,4.21,101.975
+SG,Singapore,SGP,ASEAN,SGD,1.352,103.819
+VN,Vietnam,VNM,ASEAN,VND,14.058,108.277
