@@ -17,6 +17,18 @@ COUNTRIES = [
     {"id": "VN", "name": "Vietnam", "iso": "VNM", "currency": "VND", "lat": 14.058, "lon": 108.277, "profile": "aggressive", "base_arrivals": 800000, "rev_per_tourist": 700, "pop": 98000000, "gdp_base": 280000000000}
 ]
 
+MODELS = [
+    {"id": 1, "name": "Baseline", "type": "Moving Average", "desc": "Simple historical average"},
+    {"id": 2, "name": "Prophet", "type": "Time Series", "desc": "Facebook Prophet model with seasonality"},
+    {"id": 3, "name": "SARIMAX", "type": "Econometric", "desc": "SARIMAX with weather exogenous variables"}
+]
+
+METRICS = [
+    {"id": 1, "name": "TCS", "category": "Competitiveness", "unit": "Score"},
+    {"id": 2, "name": "Recovery Index", "category": "Resilience", "unit": "Index"},
+    {"id": 3, "name": "Arrival Growth", "category": "Growth", "unit": "Percentage"}
+]
+
 def get_covid_factor(year, month):
     if year < 2020: return 1.0
     if year == 2020:
@@ -30,7 +42,6 @@ def get_covid_factor(year, month):
     if year == 2025: return random.uniform(0.95, 1.1)
 
 def get_seasonality(month):
-    # Peaks in Dec, Jul, Aug
     if month in [12, 7, 8]: return random.uniform(1.1, 1.25)
     if month in [2, 3]: return random.uniform(0.85, 0.95)
     return random.uniform(0.95, 1.05)
@@ -50,10 +61,28 @@ with open(os.path.join(DATA_DIR, 'dim_date.csv'), 'w', newline='') as f:
         for m in range(1, 13):
             d = datetime.date(y, m, 1)
             date_id = int(d.strftime("%Y%m%d"))
-            month_name = d.strftime("%B")
-            year_month = d.strftime("%Y-%m")
-            quarter = (m - 1) // 3 + 1
-            writer.writerow([date_id, d.isoformat(), y, quarter, m, month_name, year_month])
+            writer.writerow([date_id, d.isoformat(), y, (m - 1) // 3 + 1, m, d.strftime("%B"), d.strftime("%Y-%m")])
+
+print("Generating dim_year.csv...")
+with open(os.path.join(DATA_DIR, 'dim_year.csv'), 'w', newline='') as f:
+    writer = csv.writer(f)
+    writer.writerow(["year_id", "year"])
+    for y in range(START_YEAR, END_YEAR + 1):
+        writer.writerow([y, y])
+
+print("Generating dim_model.csv...")
+with open(os.path.join(DATA_DIR, 'dim_model.csv'), 'w', newline='') as f:
+    writer = csv.writer(f)
+    writer.writerow(["model_id", "model_name", "model_type", "description"])
+    for m in MODELS:
+        writer.writerow([m["id"], m["name"], m["type"], m["desc"]])
+
+print("Generating dim_metric.csv...")
+with open(os.path.join(DATA_DIR, 'dim_metric.csv'), 'w', newline='') as f:
+    writer = csv.writer(f)
+    writer.writerow(["metric_id", "metric_name", "metric_category", "unit"])
+    for m in METRICS:
+        writer.writerow([m["id"], m["name"], m["category"], m["unit"]])
 
 print("Generating fact_tourism_monthly.csv...")
 with open(os.path.join(DATA_DIR, 'fact_tourism_monthly.csv'), 'w', newline='') as f:
@@ -62,21 +91,16 @@ with open(os.path.join(DATA_DIR, 'fact_tourism_monthly.csv'), 'w', newline='') a
     tourism_id = 1
     for y in range(START_YEAR, END_YEAR + 1):
         for m in range(1, 13):
-            d = datetime.date(y, m, 1)
-            date_id = int(d.strftime("%Y%m%d"))
+            date_id = int(datetime.date(y, m, 1).strftime("%Y%m%d"))
             covid = get_covid_factor(y, m)
             season = get_seasonality(m)
-            
             for c in COUNTRIES:
                 growth_factor = 1.0 + ((y - START_YEAR) * 0.05)
                 if c["profile"] == "aggressive": growth_factor = 1.0 + ((y - START_YEAR) * 0.1)
-                
                 arrivals = int(c["base_arrivals"] * growth_factor * covid * season * random.uniform(0.95, 1.05))
                 revenue = arrivals * c["rev_per_tourist"] * random.uniform(0.9, 1.1)
-                
                 occupancy = min(max(random.uniform(0.4, 0.6) * covid * season * 1.5, 0.1), 0.95)
                 los = random.uniform(3.0, 7.0) * (1.2 if covid < 0.5 else 1.0)
-                
                 writer.writerow([tourism_id, c["id"], date_id, arrivals, round(revenue, 2), round(occupancy, 3), round(los, 1)])
                 tourism_id += 1
 
@@ -89,11 +113,8 @@ with open(os.path.join(DATA_DIR, 'fact_economy_yearly.csv'), 'w', newline='') as
         for c in COUNTRIES:
             gdp_growth = random.uniform(0.03, 0.07)
             if y == 2020: gdp_growth = random.uniform(-0.06, -0.02)
-            
             gdp = c["gdp_base"] * (1 + gdp_growth) ** (y - START_YEAR)
-            inflation = random.uniform(0.01, 0.05)
-            if y >= 2022: inflation = random.uniform(0.04, 0.08)
-            
+            inflation = random.uniform(0.01, 0.05) if y < 2022 else random.uniform(0.04, 0.08)
             pop = int(c["pop"] * (1 + 0.01) ** (y - START_YEAR))
             writer.writerow([econ_id, c["id"], y, round(gdp, 2), round(gdp_growth, 3), round(inflation, 3), pop])
             econ_id += 1
@@ -130,17 +151,26 @@ with open(os.path.join(DATA_DIR, 'fact_exchange_rate_monthly.csv'), 'w', newline
                 writer.writerow([xid, c["id"], date_id, round(rate, 2), round(change, 4)])
                 xid += 1
 
-print("Generating forecast_results.csv...")
-with open(os.path.join(DATA_DIR, 'forecast_results.csv'), 'w', newline='') as f:
+print("Generating fact_forecast_monthly.csv...")
+with open(os.path.join(DATA_DIR, 'fact_forecast_monthly.csv'), 'w', newline='') as f:
     writer = csv.writer(f)
-    writer.writerow(["country", "month", "actual_arrivals", "forecast_arrivals", "forecast_growth", "model_name", "model_mape"])
-    models = [("Baseline", 0.22), ("Prophet", 0.15), ("SARIMAX", 0.13)]
+    writer.writerow(["forecast_id", "country_id", "date_id", "actual_arrivals", "forecast_arrivals", "forecast_growth", "model_id", "model_mape"])
+    fid = 1
+    mapes = {1: 0.22, 2: 0.15, 3: 0.13}
     for c in COUNTRIES:
-        for m in range(1, 13):
-            for model_name, mape in models:
+        for m in range(1, 13): # Forecasting year 2026
+            date_id = int(datetime.date(2026, m, 1).strftime("%Y%m%d"))
+            for model_id, mape in mapes.items():
                 actual = ""
                 forecast = int(c["base_arrivals"] * 1.5 * get_seasonality(m) * random.uniform(1-mape, 1+mape))
                 growth = random.uniform(0.01, 0.08)
-                writer.writerow([c["name"], f"2026-{m:02d}", actual, forecast, round(growth, 3), model_name, mape])
+                writer.writerow([fid, c["id"], date_id, actual, forecast, round(growth, 3), model_id, mape])
+                fid += 1
+
+# Delete old forecast file if it exists
+old_file = os.path.join(DATA_DIR, 'forecast_results.csv')
+if os.path.exists(old_file):
+    os.remove(old_file)
+    print("Deleted old forecast_results.csv")
 
 print("Data generation completed successfully.")

@@ -1,0 +1,4 @@
+model_id,model_name,model_type,description
+1,Baseline,Moving Average,Simple historical average
+2,Prophet,Time Series,Facebook Prophet model with seasonality
+3,SARIMAX,Econometric,SARIMAX with weather exogenous variables

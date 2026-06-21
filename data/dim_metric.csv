@@ -1,0 +1,4 @@
+metric_id,metric_name,metric_category,unit
+1,TCS,Competitiveness,Score
+2,Recovery Index,Resilience,Index
+3,Arrival Growth,Growth,Percentage
