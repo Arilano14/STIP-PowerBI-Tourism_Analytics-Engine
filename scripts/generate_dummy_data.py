@@ -157,15 +157,20 @@ with open(os.path.join(DATA_DIR, 'fact_forecast_monthly.csv'), 'w', newline='') 
     writer.writerow(["forecast_id", "country_id", "date_id", "actual_arrivals", "forecast_arrivals", "forecast_growth", "model_id", "model_mape"])
     fid = 1
     mapes = {1: 0.22, 2: 0.15, 3: 0.13}
-    for c in COUNTRIES:
-        for m in range(1, 13): # Forecasting year 2026
-            date_id = int(datetime.date(2026, m, 1).strftime("%Y%m%d"))
-            for model_id, mape in mapes.items():
-                actual = ""
-                forecast = int(c["base_arrivals"] * 1.5 * get_seasonality(m) * random.uniform(1-mape, 1+mape))
-                growth = random.uniform(0.01, 0.08)
-                writer.writerow([fid, c["id"], date_id, actual, forecast, round(growth, 3), model_id, mape])
-                fid += 1
+    for y in range(START_YEAR, END_YEAR + 1):
+        for m in range(1, 13):
+            date_id = int(datetime.date(y, m, 1).strftime("%Y%m%d"))
+            covid = get_covid_factor(y, m)
+            season = get_seasonality(m)
+            for c in COUNTRIES:
+                for model_id, mape in mapes.items():
+                    growth_factor = 1.0 + ((y - START_YEAR) * 0.05)
+                    if c["profile"] == "aggressive": growth_factor = 1.0 + ((y - START_YEAR) * 0.1)
+                    actual_arrivals = int(c["base_arrivals"] * growth_factor * covid * season * random.uniform(0.95, 1.05))
+                    forecast = int(actual_arrivals * random.uniform(1-mape, 1+mape))
+                    growth = random.uniform(-0.05, 0.08)
+                    writer.writerow([fid, c["id"], date_id, actual_arrivals, forecast, round(growth, 3), model_id, mape])
+                    fid += 1
 
 # Delete old forecast file if it exists
 old_file = os.path.join(DATA_DIR, 'forecast_results.csv')
