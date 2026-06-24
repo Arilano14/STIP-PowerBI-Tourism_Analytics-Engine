@@ -1,0 +1,5 @@
+role_id,role_name,access_level,rls_filter
+1,Admin,Full Access,None
+2,Regional Manager,Restricted,dim_country[region] = USERPRINCIPALNAME()
+3,Country Analyst,Restricted,dim_country[country_id] = USERPRINCIPALNAME()
+4,Public Viewer,Aggregated Only,None

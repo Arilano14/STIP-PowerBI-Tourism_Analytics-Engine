@@ -1,0 +1,6 @@
+rq_id,question,category,mapped_page
+RQ1,How do tourism trends recover post-COVID?,Trend,Demand Analysis
+RQ2,What are the key drivers of tourism demand?,Driver,Economic Drivers
+RQ3,Which forecasting model performs best?,Predictive,Forecasting
+RQ4,How does weather impact tourist arrivals?,External,Demand Analysis
+RQ5,What is the correlation between exchange rates and arrivals?,Economic,Economic Drivers

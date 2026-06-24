@@ -1,0 +1,6 @@
+page_id,page_name,icon,sort_order,is_active
+1,Executive Summary,Home,1,Yes
+2,Demand Analysis,BarChart,2,Yes
+3,Economic Drivers,LineChart,3,Yes
+4,Forecasting,TrendingUp,4,Yes
+5,Recommendations,Lightbulb,5,Yes

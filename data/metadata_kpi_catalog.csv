@@ -1,0 +1,9 @@
+kpi_id,kpi_name,category,description,format
+1,Total Arrivals,Demand,Total number of international tourist arrivals,"#,##0"
+2,Total Revenue,Economy,Total tourism receipts in USD,"$#,##0.00"
+3,Recovery Index,Resilience,Current arrivals vs 2019 baseline,0.0%
+4,Occupancy Rate,Capacity,Average hotel occupancy rate,0.0%
+5,Avg Length of Stay,Behavior,Average days spent per tourist,0.0
+6,Arrival Growth,Growth,YoY arrival growth percentage,0.0%
+7,Forecast Accuracy,Predictive,MAPE of the forecasting model,0.0%
+8,GDP Contribution,Economy,Tourism revenue as % of GDP,0.00%

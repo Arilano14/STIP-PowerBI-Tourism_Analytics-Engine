@@ -1,0 +1,4 @@
+embed_id,embed_type,token_type,role_required,status
+1,Report,EmbedToken,Viewer,Ready
+2,Dashboard,EmbedToken,Viewer,Ready
+3,QnA,EmbedToken,Pro,Planned

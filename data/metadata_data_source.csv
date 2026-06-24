@@ -1,0 +1,5 @@
+source_id,source_name,connection_type,status,refresh_frequency,future_api_endpoint
+1,Dummy Generator,Local CSV,Active,Manual,N/A
+2,World Bank,REST API,Planned,Monthly,api.worldbank.org/v2/country/all/indicator
+3,Open Meteo,REST API,Planned,Daily,api.open-meteo.com/v1/historical
+4,Frankfurter,REST API,Planned,Daily,api.frankfurter.app/latest

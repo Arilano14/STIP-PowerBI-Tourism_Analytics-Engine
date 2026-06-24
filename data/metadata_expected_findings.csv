@@ -1,0 +1,6 @@
+finding_id,rq_id,hypothesis,validation_status
+1,RQ1,Recovery reaches 2019 levels by 2024,Pending
+2,RQ2,GDP growth strongly correlates with tourism receipts,Pending
+3,RQ3,SARIMAX outperforms Baseline due to external regressors,Pending
+4,RQ4,High rainfall negatively impacts short-term arrivals,Pending
+5,RQ5,Weaker local currency boosts international arrivals,Pending
